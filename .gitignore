@@ -20,8 +20,6 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
-android/
-ios/
 __tests__/
 
 # Android/IntelliJ
