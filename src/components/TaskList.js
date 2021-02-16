@@ -20,7 +20,7 @@ const TaskList = ({ taskData, deleteTask }) => {
 
     return (
         <View>
-            <Text>Task List1</Text>
+            <Text>Task List</Text>
             <FlatList
                 data={taskData} 
                 renderItem={taskRender}
