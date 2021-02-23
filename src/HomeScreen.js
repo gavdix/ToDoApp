@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useState, useEffect, useRef } from 'react';
-import { View, AppState, StyleSheet } from "react-native";
+import React, { useState, useEffect} from 'react';
+import { View, StyleSheet } from "react-native";
 
 import AddTask from "./components/AddTask";
 import TaskList from './components/TaskList';
@@ -19,22 +19,21 @@ const HomeScreen = () => {
         }
     }
 
-    useEffect(() => {
-        AppState.addEventListener("change", (taskData) => { _handleAppStateChange(taskData) });
-
-        // return () => {
-        //     AppState.removeEventListener("change", _handleAppStateChange);
-        // };
-    }, []);
-
-    const _handleAppStateChange = (taskData) => {
-        console.log(AppState.currentState + " & taskData " + taskData)
-        if (AppState.currentState !== "active") {
-            const jsonValue = JSON.stringify(taskData);
-            console.log("json value  ", jsonValue);
-            storeTaskData(jsonValue);
+    const getTaskData = async () => {
+        try {
+          const jsonValue = await AsyncStorage.getItem('@toDoAppTasks')
+          if (jsonValue !== null) {
+            let retrivedTaskData = JSON.parse(jsonValue);
+            // console.log("jason returned by getitem", jsonValue);
+            setTaskData(retrivedTaskData);
+          } else {
+            console.log("I am null");
+          }
+        } catch (error) {
+          console.log(error);
         }
-    };    
+        return null;
+    }
 
     let [taskData , setTaskData] = useState([
         {
@@ -54,6 +53,16 @@ const HomeScreen = () => {
         }
     ]);
 
+    useEffect(() => {
+        getTaskData();
+    }, []);
+
+    useEffect(() => {
+        // console.log("componentDidUpdate===============================", taskData)
+        const jsonValue = JSON.stringify(taskData);
+        storeTaskData(jsonValue);
+    }, [taskData]);
+
     const deleteTask = (itemId) => {
         console.log(itemId);
         setTaskData(taskData.filter((task) => task.id !== itemId))
@@ -62,16 +71,11 @@ const HomeScreen = () => {
     const addTask = (newTask) => {
         let id = Math.floor(Math.random() * 100) + 1;
         setTaskData((taskData) => {return [...taskData, {id, ...newTask}]})
-        console.log("set task data  ", taskData);
-
-        // const jsonValue1 = JSON.stringify(taskData);
-        // console.log("json value  ", jsonValue1);
-        // storeTaskData(jsonValue1);
+        // console.log("set task data  ", taskData);
     }
 
     return (
         <View style={{marginTop: 20}}>
-            {/* <Text>Home Screen</Text> */}
             <AddTask addTask={addTask}/>
             <Separator />
             <TaskList taskData={taskData} deleteTask={deleteTask}/>
